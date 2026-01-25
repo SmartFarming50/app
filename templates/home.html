@@ -1,17 +1,23 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Railway QR System - Home</title>
-    <style>
-        body { font-family: Arial, sans-serif; text-align: center; padding: 50px; }
-        a { display: block; margin: 20px; padding: 15px; background: #4CAF50; color: white; text-decoration: none; border-radius: 5px; }
-        a:hover { background: #45a049; }
-    </style>
+    <title>Home</title>
 </head>
 <body>
-    <h1>Railway QR System</h1>
-    <a href="/admin-ui">Admin Panel (Generate QR)</a>
-    <a href="/scan">Scan QR / Add Passenger</a>
+    <h2>QR Passenger System</h2>
+
+    <button onclick="location.href='/add-next'">
+        ➕ Add Next User
+    </button>
+    <br><br>
+
+    <button onclick="location.href='/scan'">
+        📷 Scan QR
+    </button>
+    <br><br>
+
+    <button onclick="location.href='/admin-ui'">
+        ⚙️ Admin Panel
+    </button>
 </body>
 </html>
