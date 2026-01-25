@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Scan QR Live</title>
+    <title>Live QR Scanner</title>
     <script src="https://unpkg.com/html5-qrcode"></script>
 </head>
 <body>
@@ -11,25 +11,20 @@
 
     <script>
         function onScanSuccess(decodedText, decodedResult) {
-            // Stop scanning after first QR
             html5QrcodeScanner.clear().then(_ => {
-                // Redirect to backend with decoded QR
                 window.location.href = "/add-ui/" + decodedText;
-            }).catch(error => {
-                console.error("Failed to clear scanner", error);
+            }).catch(err => {
+                console.error(err);
             });
         }
 
-        function onScanFailure(error) {
-            // Do nothing on scan failure
-        }
+        function onScanFailure(error) {}
 
         let html5QrcodeScanner = new Html5Qrcode("reader");
-
         const config = { fps: 10, qrbox: 250 };
 
         html5QrcodeScanner.start(
-            { facingMode: "environment" }, // rear camera
+            { facingMode: "environment" },
             config,
             onScanSuccess,
             onScanFailure
