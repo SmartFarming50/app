@@ -1,0 +1,16 @@
+<script src="https://unpkg.com/html5-qrcode"></script>
+<h2>Scan QR Code</h2>
+<div id="reader" style="width:300px;"></div>
+
+<script>
+function onScanSuccess(decodedText, decodedResult) {
+    window.location.href = "/add/" + decodedText;
+}
+
+var html5QrCode = new Html5Qrcode("reader");
+html5QrCode.start(
+    { facingMode: "environment" },
+    { fps: 10 },
+    onScanSuccess
+);
+</script>
