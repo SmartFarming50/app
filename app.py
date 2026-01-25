@@ -182,14 +182,18 @@ def scan():
 # ---------------- GENERATE QR IMAGE FROM TEXT ----------------
 @app.route("/qr-image/<qr_code>")
 def qr_image(qr_code):
-    img = qrcode.make(qr_code)
+    qr_url = f"https://app-production-cf67.up.railway.app/view/{qr_code}"
+
+    img = qrcode.make(qr_url)
     buf = BytesIO()
     img.save(buf, format="PNG")
     buf.seek(0)
     return send_file(buf, mimetype="image/png")
 
+
 # ---------------- START APP ----------------
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8080))
     app.run(host="0.0.0.0", port=port)
+
 
