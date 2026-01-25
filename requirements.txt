@@ -3,4 +3,3 @@ mysql-connector-python
 qrcode
 Pillow
 python-dotenv
-html5-qrcode
