@@ -1,12 +1,111 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>QR System Home</title>
+    <meta charset="UTF-8">
+    <title>QR Passenger System</title>
+
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            background: #fff;
+            width: 100%;
+            max-width: 420px;
+            padding: 35px 25px;
+            border-radius: 14px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+
+        h1 {
+            margin-bottom: 25px;
+            color: #333;
+            font-size: 24px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            margin-bottom: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 500;
+            color: #fff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: 0.3s ease;
+        }
+
+        .btn i {
+            font-size: 18px;
+        }
+
+        .btn-add {
+            background: #667eea;
+        }
+
+        .btn-scan {
+            background: #17a2b8;
+        }
+
+        .btn-admin {
+            background: #28a745;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            opacity: 0.95;
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 22px;
+            }
+        }
+    </style>
 </head>
 <body>
-    <h1>QR Passenger System</h1>
-    <button onclick="location.href='/add-next'">Add Next Passenger</button><br><br>
-    <button onclick="location.href='/scan'">Scan QR Live</button><br><br>
-    <button onclick="location.href='/admin-ui'">Admin Generate QR</button><br><br>
+
+    <div class="container">
+        <h1>QR Passenger System</h1>
+
+        <button class="btn btn-add" onclick="location.href='/add-next'">
+            <i class="fas fa-user-plus"></i>
+            Add Next Passenger
+        </button>
+
+        <button class="btn btn-scan" onclick="location.href='/scan'">
+            <i class="fas fa-qrcode"></i>
+            Scan QR Live
+        </button>
+
+        <button class="btn btn-admin" onclick="location.href='/admin-ui'">
+            <i class="fas fa-user-shield"></i>
+            Admin Generate QR
+        </button>
+    </div>
+
 </body>
 </html>
