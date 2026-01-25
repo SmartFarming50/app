@@ -1,5 +1,4 @@
-# app.py
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request
 import mysql.connector
 from io import BytesIO
 import qrcode
@@ -11,12 +10,12 @@ app = Flask(__name__)
 
 # ---------------- DATABASE CONNECTION ----------------
 def get_db():
-    """Connect to Railway MySQL using public URL (hopper proxy)."""
     db_url = os.environ.get("MYSQL_PUBLIC_URL")
     if not db_url:
-        raise Exception("MYSQL_PUBLIC_URL environment variable not set")
-    
+        raise Exception("MYSQL_PUBLIC_URL not set")
+
     url = urlparse(db_url)
+
     for _ in range(5):
         try:
             return mysql.connector.connect(
@@ -24,12 +23,15 @@ def get_db():
                 port=url.port,
                 user=url.username,
                 password=url.password,
-                database=url.path.lstrip("/")
+                database=url.path.lstrip("/"),
+                ssl_disabled=False,
+                connection_timeout=10
             )
         except mysql.connector.Error as e:
-            print("Waiting for DB...", e)
+            print("Waiting for DB connection...", e)
             time.sleep(5)
-    raise Exception("Could not connect to MySQL database")
+
+    raise Exception("Could not connect to MySQL")
 
 # ---------------- HOME ----------------
 @app.route("/")
@@ -45,10 +47,10 @@ def admin_ui():
 @app.route("/admin", methods=["POST"])
 def admin_generate():
     count = int(request.form.get("count", 1))
+
     db = get_db()
     cur = db.cursor()
 
-    # Get last QR ID
     cur.execute("SELECT IFNULL(MAX(id), 0) FROM qr_master")
     last_id = cur.fetchone()[0]
 
@@ -57,10 +59,9 @@ def admin_generate():
         img = qrcode.make(qr_code)
         buf = BytesIO()
         img.save(buf, format="PNG")
-        
-        # Insert into qr_master
+
         cur.execute(
-            "INSERT INTO qr_master (qr_code, qr_image) VALUES (%s,%s)",
+            "INSERT INTO qr_master (qr_code, qr_image) VALUES (%s, %s)",
             (qr_code, buf.getvalue())
         )
 
@@ -74,23 +75,19 @@ def admin_generate():
 def scan():
     return render_template("scan.html")
 
-# ---------------- ADD PASSENGER DETAILS ----------------
+# ---------------- ADD PASSENGER ----------------
 @app.route("/add-ui/<qr_code>", methods=["GET", "POST"])
 def add_ui(qr_code):
     db = get_db()
     cur = db.cursor(dictionary=True)
 
-    # Check QR exists and unused
     cur.execute("SELECT status FROM qr_master WHERE qr_code=%s", (qr_code,))
     qr = cur.fetchone()
+
     if not qr:
-        cur.close()
-        db.close()
         return "INVALID QR"
 
     if qr["status"] == "USED":
-        cur.close()
-        db.close()
         return "QR ALREADY USED"
 
     if request.method == "POST":
@@ -108,8 +105,11 @@ def add_ui(qr_code):
             d.get("mother")
         ))
 
-        # Update QR status
-        cur.execute("UPDATE qr_master SET status='USED' WHERE qr_code=%s", (qr_code,))
+        cur.execute(
+            "UPDATE qr_master SET status='USED' WHERE qr_code=%s",
+            (qr_code,)
+        )
+
         db.commit()
         cur.close()
         db.close()
@@ -119,17 +119,24 @@ def add_ui(qr_code):
     db.close()
     return render_template("add.html", qr_code=qr_code)
 
-# ---------------- VIEW PASSENGER BY QR ----------------
+# ---------------- VIEW PASSENGER ----------------
 @app.route("/view/<qr_code>")
 def view_passenger(qr_code):
     db = get_db()
     cur = db.cursor(dictionary=True)
-    cur.execute("SELECT * FROM passenger_details WHERE qr_code=%s", (qr_code,))
+
+    cur.execute(
+        "SELECT * FROM passenger_details WHERE qr_code=%s",
+        (qr_code,)
+    )
     passenger = cur.fetchone()
+
     cur.close()
     db.close()
+
     if not passenger:
         return "No passenger found"
+
     return render_template("view.html", passenger=passenger)
 
 # ---------------- START APP ----------------
