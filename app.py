@@ -162,7 +162,7 @@ def view_passenger(qr_code):
 
     return render_template("view.html", passenger=passenger)
 
-# ---------------- SCAN PAGE ----------------
+# ---------------- SCAN PAGE (LIVE CAMERA) ----------------
 @app.route("/scan")
 def scan():
     return render_template("scan.html")
