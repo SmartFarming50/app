@@ -10,5 +10,31 @@
         <input type="number" name="count" value="1" min="1" required>
         <button type="submit">Generate</button>
     </form>
+
+    <hr>
+    <h3>All QR Codes</h3>
+
+    {% if qr_list %}
+        <table border="1" cellpadding="5" cellspacing="0">
+            <tr>
+                <th>Sequence (ID)</th>
+                <th>QR Code</th>
+                <th>Status</th>
+                <th>QR Image</th>
+            </tr>
+            {% for qr in qr_list %}
+            <tr>
+                <td>{{ qr.id }}</td>
+                <td>{{ qr.qr_code }}</td>
+                <td>{{ qr.status if qr.status else "UNUSED" }}</td>
+                <td>
+                    <img src="/qr-image/{{ qr.qr_code }}" width="100">
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <p>No QR codes generated yet.</p>
+    {% endif %}
 </body>
 </html>
