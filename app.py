@@ -38,10 +38,19 @@ def get_db():
 def home():
     return render_template("home.html")
 
-# ---------------- ADMIN PANEL ----------------
+
 @app.route("/admin-ui")
 def admin_ui():
-    return render_template("admin.html")
+    db = get_db()
+    cur = db.cursor(dictionary=True)
+
+    cur.execute("SELECT * FROM qr_data ORDER BY id ASC")
+    qr_list = cur.fetchall()
+
+    cur.close()
+    db.close()
+    return render_template("admin.html", qr_list=qr_list)
+
 
 # ---------------- GENERATE QR CODES ----------------
 @app.route("/admin", methods=["POST"])
@@ -180,3 +189,4 @@ def qr_image(qr_code):
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8080))
     app.run(host="0.0.0.0", port=port)
+
