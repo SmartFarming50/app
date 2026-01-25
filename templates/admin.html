@@ -22,6 +22,10 @@
                 <th>Status</th>
                 <th>QR Image</th>
             </tr>
+            <a href="/admin/download-qr-pdf" target="_blank">
+            <button>Download All QR Codes (PDF)</button>
+            </a>
+
             {% for qr in qr_list %}
             <tr>
                 <td>{{ qr.id }}</td>
