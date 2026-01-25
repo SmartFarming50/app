@@ -3,41 +3,24 @@ import mysql.connector
 import qrcode
 from io import BytesIO
 import os
-import time
 from urllib.parse import urlparse
 
 app = Flask(__name__)
 
-# ---------------- DATABASE CONNECTION (SMART) ----------------
+# ---------------- DATABASE CONNECTION ----------------
 def get_db():
-    # Try MYSQL_URL / MYSQL_PUBLIC_URL first
-    db_url = os.environ.get("MYSQL_URL") or os.environ.get("MYSQL_PUBLIC_URL")
+    db_url = os.environ.get("MYSQL_PUBLIC_URL")
+    if not db_url:
+        raise Exception("MYSQL_PUBLIC_URL not set in environment variables")
 
-    if db_url:
-        url = urlparse(db_url)
-        return mysql.connector.connect(
-            host=url.hostname,
-            user=url.username,
-            password=url.password,
-            database=url.path.lstrip("/"),
-            port=url.port
-        )
-
-    # Fallback to internal vars (if linked)
-    for _ in range(5):
-        try:
-            return mysql.connector.connect(
-                host=os.environ["MYSQLHOST"],
-                user=os.environ["MYSQLUSER"],
-                password=os.environ["MYSQLPASSWORD"],
-                database=os.environ["MYSQLDATABASE"],
-                port=int(os.environ.get("MYSQLPORT", 3306))
-            )
-        except Exception as e:
-            print("Waiting for DB...", e)
-            time.sleep(5)
-
-    raise Exception("MySQL connection failed")
+    url = urlparse(db_url)
+    return mysql.connector.connect(
+        host=url.hostname,
+        user=url.username,
+        password=url.password,
+        database=url.path.lstrip("/"),
+        port=url.port
+    )
 
 # ---------------- HOME ----------------
 @app.route("/")
@@ -123,6 +106,20 @@ def add_ui(qr_code):
     cur.close()
     db.close()
     return render_template("add.html", qr_code=qr_code)
+
+# ---------------- FETCH PASSENGER ----------------
+@app.route("/fetch/<qr_code>")
+def fetch(qr_code):
+    db = get_db()
+    cur = db.cursor(dictionary=True)
+    cur.execute(
+        "SELECT * FROM passenger_details WHERE qr_code=%s",
+        (qr_code,)
+    )
+    data = cur.fetchone()
+    cur.close()
+    db.close()
+    return jsonify(data)
 
 # ---------------- START ----------------
 if __name__ == "__main__":
