@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Live QR Scanner</title>
+    <title>Scan QR</title>
     <script src="https://unpkg.com/html5-qrcode"></script>
 </head>
 <body>
-    <h2>Live QR Scanner</h2>
+    <h2>Scan QR Code</h2>
+
+    <!-- LIVE CAMERA SCANNER -->
     <div id="reader" style="width:300px;height:300px;"></div>
     <p id="result"></p>
 
@@ -30,5 +32,12 @@
             onScanFailure
         );
     </script>
+
+    <hr>
+    <h3>Or Upload QR Image</h3>
+    <form method="POST" enctype="multipart/form-data">
+        <input type="file" name="qr_image" accept="image/*" required>
+        <button type="submit">Scan Image</button>
+    </form>
 </body>
 </html>
