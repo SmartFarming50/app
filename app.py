@@ -1,7 +1,5 @@
 from flask import Flask, render_template, request
 import mysql.connector
-from io import BytesIO
-import qrcode
 import os
 import time
 from urllib.parse import urlparse
@@ -11,9 +9,6 @@ app = Flask(__name__)
 # ---------------- DATABASE CONNECTION ----------------
 def get_db():
     db_url = os.environ.get("MYSQL_PUBLIC_URL")
-    if not db_url:
-        raise Exception("MYSQL_PUBLIC_URL not set")
-
     url = urlparse(db_url)
 
     for _ in range(5):
@@ -24,14 +19,13 @@ def get_db():
                 user=url.username,
                 password=url.password,
                 database=url.path.lstrip("/"),
-                ssl_disabled=False,
-                connection_timeout=10
+                ssl_disabled=False
             )
         except mysql.connector.Error as e:
-            print("Waiting for DB connection...", e)
+            print("Waiting for DB...", e)
             time.sleep(5)
 
-    raise Exception("Could not connect to MySQL")
+    raise Exception("DB connection failed")
 
 # ---------------- HOME ----------------
 @app.route("/")
@@ -43,7 +37,7 @@ def home():
 def admin_ui():
     return render_template("admin.html")
 
-# ---------------- ADMIN GENERATE QRs ----------------
+# ---------------- ADMIN GENERATE QR (TEXT ONLY) ----------------
 @app.route("/admin", methods=["POST"])
 def admin_generate():
     count = int(request.form.get("count", 1))
@@ -56,21 +50,19 @@ def admin_generate():
 
     for i in range(1, count + 1):
         qr_code = f"RAIL-{last_id + i}"
-        img = qrcode.make(qr_code)
-        buf = BytesIO()
-        img.save(buf, format="PNG")
 
+        # ✅ TEXT ONLY — NO IMAGE
         cur.execute(
-            "INSERT INTO qr_master (qr_code, qr_image) VALUES (%s, %s)",
-            (qr_code, buf.getvalue())
+            "INSERT INTO qr_master (qr_code) VALUES (%s)",
+            (qr_code,)
         )
 
     db.commit()
     cur.close()
     db.close()
-    return f"{count} QR(s) generated successfully!"
+    return "QR codes generated successfully"
 
-# ---------------- SCAN UI ----------------
+# ---------------- SCAN ----------------
 @app.route("/scan")
 def scan():
     return render_template("scan.html")
@@ -92,10 +84,11 @@ def add_ui(qr_code):
 
     if request.method == "POST":
         d = request.form
+
         cur.execute("""
             INSERT INTO passenger_details
-            (qr_code, name, address, phone, father, mother)
-            VALUES (%s,%s,%s,%s,%s,%s)
+            (qr_code, name, address, phone, father, mother, filled_at)
+            VALUES (%s,%s,%s,%s,%s,%s,NOW())
         """, (
             qr_code,
             d.get("name"),
@@ -113,7 +106,7 @@ def add_ui(qr_code):
         db.commit()
         cur.close()
         db.close()
-        return "Passenger saved successfully!"
+        return "Passenger saved successfully"
 
     cur.close()
     db.close()
