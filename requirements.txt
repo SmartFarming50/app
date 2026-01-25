@@ -3,3 +3,4 @@ mysql-connector-python
 qrcode
 Pillow
 python-dotenv
+reportlab
