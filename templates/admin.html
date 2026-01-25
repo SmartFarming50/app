@@ -1,22 +1,14 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Admin - Generate QR</title>
-    <style>
-        body { font-family: Arial, sans-serif; text-align: center; padding: 50px; }
-        input, button { padding: 10px; margin: 10px; font-size: 16px; }
-    </style>
+    <title>Admin Panel</title>
 </head>
 <body>
-    <h1>Admin Panel</h1>
-    <form action="/admin" method="post">
-        <label>Number of QR codes to generate:</label>
+    <h2>Generate QR Codes</h2>
+    <form method="POST" action="/admin">
+        <label>How many QR codes to generate:</label>
         <input type="number" name="count" value="1" min="1" required>
-        <br>
-        <button type="submit">Generate QR</button>
+        <button type="submit">Generate</button>
     </form>
-    <br>
-    <a href="/">Back to Home</a>
 </body>
 </html>
