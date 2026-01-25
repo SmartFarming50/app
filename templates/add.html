@@ -1,26 +1,22 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Add Passenger</title>
-    <style>
-        body { font-family: Arial, sans-serif; padding: 50px; max-width: 500px; margin: auto; }
-        input, textarea, button { width: 100%; padding: 10px; margin: 10px 0; font-size: 16px; }
-        button { background-color: #4CAF50; color: white; border: none; cursor: pointer; }
-        button:hover { background-color: #45a049; }
-    </style>
+    <title>Fill Details</title>
 </head>
 <body>
-    <h1>Add Passenger for QR: {{ qr_code }}</h1>
-    <form method="post">
-        <input type="text" name="name" placeholder="Name" required>
-        <textarea name="address" placeholder="Address" required></textarea>
-        <input type="text" name="phone" placeholder="Phone Number" required>
-        <input type="text" name="father" placeholder="Father's Name" required>
-        <input type="text" name="mother" placeholder="Mother's Name" required>
-        <button type="submit">Submit</button>
+    <h3>Fill Passenger Details</h3>
+
+    <p><b>QR Code:</b> {{ qr_code }}</p>
+    <img src="/qr-image/{{ qr_code }}" width="200"><br><br>
+
+    <form method="POST">
+        <input name="name" placeholder="Name" required><br><br>
+        <input name="father" placeholder="Father"><br><br>
+        <input name="mother" placeholder="Mother"><br><br>
+        <input name="phone" placeholder="Phone"><br><br>
+        <textarea name="address" placeholder="Address"></textarea><br><br>
+
+        <button type="submit">Save</button>
     </form>
-    <br>
-    <a href="/">Back to Home</a>
 </body>
 </html>
