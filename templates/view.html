@@ -1,18 +1,15 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Details</title>
+    <title>Passenger Details</title>
 </head>
 <body>
-    <h3>Passenger Details</h3>
-
-    <img src="/qr-image/{{ passenger.qr_code }}" width="200"><br><br>
-
-    <p><b>Name:</b> {{ passenger.name }}</p>
-    <p><b>Father:</b> {{ passenger.father }}</p>
-    <p><b>Mother:</b> {{ passenger.mother }}</p>
-    <p><b>Phone:</b> {{ passenger.phone }}</p>
-    <p><b>Address:</b> {{ passenger.address }}</p>
-    <p><b>Filled At:</b> {{ passenger.filled_at }}</p>
+    <h2>QR Code: {{ passenger.qr_code }}</h2>
+    <p><strong>Name:</strong> {{ passenger.name }}</p>
+    <p><strong>Father:</strong> {{ passenger.father }}</p>
+    <p><strong>Mother:</strong> {{ passenger.mother }}</p>
+    <p><strong>Phone:</strong> {{ passenger.phone }}</p>
+    <p><strong>Address:</strong> {{ passenger.address }}</p>
+    <p><strong>Filled At:</strong> {{ passenger.filled_at }}</p>
 </body>
 </html>
