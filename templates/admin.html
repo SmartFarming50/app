@@ -1,45 +1,211 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Admin Panel</title>
+    <meta charset="UTF-8">
+    <title>Admin Panel - QR Management</title>
+
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: #f4f6fb;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: auto;
+        }
+
+        h2, h3 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        /* Card */
+        .card {
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            margin-bottom: 25px;
+        }
+
+        /* Form */
+        .form-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        label {
+            font-size: 14px;
+            color: #555;
+        }
+
+        input[type="number"] {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            width: 120px;
+            font-size: 14px;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 6px;
+            background: #667eea;
+            color: #fff;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            background: #5568d9;
+        }
+
+        .download-btn {
+            background: #28a745;
+            margin-bottom: 15px;
+        }
+
+        .download-btn:hover {
+            background: #218838;
+        }
+
+        /* Table */
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 600px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: center;
+            border-bottom: 1px solid #eee;
+            font-size: 14px;
+        }
+
+        th {
+            background: #667eea;
+            color: #fff;
+            font-weight: 500;
+        }
+
+        tr:hover {
+            background: #f9f9ff;
+        }
+
+        img {
+            border-radius: 6px;
+            border: 1px solid #ddd;
+        }
+
+        .status-used {
+            color: green;
+            font-weight: 500;
+        }
+
+        .status-unused {
+            color: red;
+            font-weight: 500;
+        }
+
+        /* Mobile */
+        @media (max-width: 600px) {
+            .form-group {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            input[type="number"], button {
+                width: 100%;
+            }
+        }
+    </style>
 </head>
 <body>
-    <h2>Generate QR Codes</h2>
-    <form method="POST" action="/admin">
-        <label>How many QR codes to generate:</label>
-        <input type="number" name="count" value="1" min="1" required>
-        <button type="submit">Generate</button>
-    </form>
 
-    <hr>
-    <h3>All QR Codes</h3>
+<div class="container">
 
-    {% if qr_list %}
-        <table border="1" cellpadding="5" cellspacing="0">
-            <tr>
-                <th>Sequence (ID)</th>
-                <th>QR Code</th>
-                <th>Status</th>
-                <th>QR Image</th>
-            </tr>
-            <a href="/admin/download-qr-pdf" target="_blank">
-            <button>Download All QR Codes (PDF)</button>
-            </a>
+    <!-- Generate QR Section -->
+    <div class="card">
+        <h2>Generate QR Codes</h2>
+        <form method="POST" action="/admin">
+            <div class="form-group">
+                <label>How many QR codes to generate:</label>
+                <input type="number" name="count" value="1" min="1" required>
+                <button type="submit">Generate</button>
+            </div>
+        </form>
+    </div>
 
-            {% for qr in qr_list %}
-            <tr>
-                <td>{{ qr.id }}</td>
-                <td>{{ qr.qr_code }}</td>
-                <td>{{ qr.status if qr.status else "UNUSED" }}</td>
-                <td>
-                    <img src="/qr-image/{{ qr.qr_code }}" width="100">
-                </td>
-            </tr>
-            {% endfor %}
-        </table>
-    {% else %}
-        <p>No QR codes generated yet.</p>
-    {% endif %}
+    <!-- QR List -->
+    <div class="card">
+        <h3>All QR Codes</h3>
+
+        {% if qr_list %}
+
+        <a href="/admin/download-qr-pdf" target="_blank">
+            <button class="download-btn">Download All QR Codes (PDF)</button>
+        </a>
+
+        <div class="table-wrapper">
+            <table>
+                <tr>
+                    <th>ID</th>
+                    <th>QR Code</th>
+                    <th>Status</th>
+                    <th>QR Image</th>
+                </tr>
+
+                {% for qr in qr_list %}
+                <tr>
+                    <td>{{ qr.id }}</td>
+                    <td>{{ qr.qr_code }}</td>
+                    <td>
+                        {% if qr.status %}
+                            <span class="status-used">{{ qr.status }}</span>
+                        {% else %}
+                            <span class="status-unused">UNUSED</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <img src="/qr-image/{{ qr.qr_code }}" width="80">
+                    </td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+
+        {% else %}
+            <p>No QR codes generated yet.</p>
+        {% endif %}
+    </div>
+
+</div>
 
 </body>
 </html>
