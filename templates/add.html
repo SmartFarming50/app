@@ -1,23 +1,26 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
     <title>Add Passenger</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 50px; max-width: 500px; margin: auto; }
+        input, textarea, button { width: 100%; padding: 10px; margin: 10px 0; font-size: 16px; }
+        button { background-color: #4CAF50; color: white; border: none; cursor: pointer; }
+        button:hover { background-color: #45a049; }
+    </style>
 </head>
 <body>
-    <h2>Passenger Details</h2>
-    <p><b>QR Code:</b> {{ qr_code }}</p>
-
+    <h1>Add Passenger for QR: {{ qr_code }}</h1>
     <form method="post">
-        <input name="name" placeholder="Passenger Name" required><br><br>
-        <input name="address" placeholder="Address" required><br><br>
-        <input name="phone" placeholder="Phone Number" required><br><br>
-        <input name="father" placeholder="Father Name" required><br><br>
-        <input name="mother" placeholder="Mother Name" required><br><br>
-
-        <button type="submit">Save Details</button>
+        <input type="text" name="name" placeholder="Name" required>
+        <textarea name="address" placeholder="Address" required></textarea>
+        <input type="text" name="phone" placeholder="Phone Number" required>
+        <input type="text" name="father" placeholder="Father's Name" required>
+        <input type="text" name="mother" placeholder="Mother's Name" required>
+        <button type="submit">Submit</button>
     </form>
-
     <br>
-    <a href="/">⬅ Back</a>
+    <a href="/">Back to Home</a>
 </body>
 </html>
