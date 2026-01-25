@@ -1,27 +1,128 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Fill Passenger Details</title>
+    <meta charset="UTF-8">
+    <title>Passenger Details</title>
+
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .card {
+            background: #ffffff;
+            width: 100%;
+            max-width: 450px;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .card h2 {
+            text-align: center;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .qr {
+            text-align: center;
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 25px;
+            word-break: break-all;
+        }
+
+        label {
+            font-size: 14px;
+            color: #444;
+            font-weight: 500;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 10px 12px;
+            margin-top: 6px;
+            margin-bottom: 18px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: 0.3s;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.15);
+        }
+
+        textarea {
+            resize: none;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            background: #667eea;
+            color: #fff;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            background: #5a6fdc;
+            transform: translateY(-1px);
+        }
+
+        @media (max-width: 480px) {
+            .card {
+                margin: 20px;
+                padding: 25px;
+            }
+        }
+    </style>
 </head>
 <body>
-    <h2>QR Code: {{ qr_code }}</h2>
-    <form method="POST">
-        <label>Name:</label><br>
-        <input type="text" name="name" required><br><br>
 
-        <label>Father:</label><br>
-        <input type="text" name="father" required><br><br>
+    <div class="card">
+        <h2>Passenger Details</h2>
+        <div class="qr">QR Code: {{ qr_code }}</div>
 
-        <label>Mother:</label><br>
-        <input type="text" name="mother" required><br><br>
+        <form method="POST">
+            <label>Name</label>
+            <input type="text" name="name" required>
 
-        <label>Phone:</label><br>
-        <input type="text" name="phone" required><br><br>
+            <label>Father</label>
+            <input type="text" name="father" required>
 
-        <label>Address:</label><br>
-        <textarea name="address" rows="4" cols="50" required></textarea><br><br>
+            <label>Mother</label>
+            <input type="text" name="mother" required>
 
-        <button type="submit">Save</button>
-    </form>
+            <label>Phone</label>
+            <input type="text" name="phone" required>
+
+            <label>Address</label>
+            <textarea name="address" rows="4" required></textarea>
+
+            <button type="submit">Save Details</button>
+        </form>
+    </div>
+
 </body>
 </html>
