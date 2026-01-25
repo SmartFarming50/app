@@ -1,10 +1,11 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request,send_file
 import mysql.connector
 import os
 import time
 from urllib.parse import urlparse
 from datetime import datetime
-
+import qrcode
+from io import BytesIO
 app = Flask(__name__)
 
 # ---------------- DB CONNECTION ----------------
@@ -32,7 +33,13 @@ def get_db():
 @app.route("/")
 def home():
     return render_template("home.html")
-
+@app.route("/qr-image/<qr_code>")
+def qr_image(qr_code):
+    img = qrcode.make(qr_code)
+    buf = BytesIO()
+    img.save(buf, format="PNG")
+    buf.seek(0)
+    return send_file(buf, mimetype="image/png")
 # ---------------- ADMIN UI ----------------
 @app.route("/admin-ui")
 def admin_ui():
@@ -143,8 +150,29 @@ def view_passenger(qr_code):
         return "No data found"
 
     return render_template("view.html", passenger=passenger)
+@app.route("/add-next")
+def add_next():
+    db = get_db()
+    cur = db.cursor(dictionary=True)
+
+    cur.execute("""
+        SELECT qr_code FROM qr_data
+        WHERE status IS NULL OR status != 'USED'
+        ORDER BY id ASC
+        LIMIT 1
+    """)
+    qr = cur.fetchone()
+
+    cur.close()
+    db.close()
+
+    if not qr:
+        return "No pending QR available"
+
+    return redirect(f"/add-ui/{qr['qr_code']}")
 
 # ---------------- START APP ----------------
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8080))
     app.run(host="0.0.0.0", port=port)
+
