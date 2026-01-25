@@ -1,16 +1,28 @@
-<script src="https://unpkg.com/html5-qrcode"></script>
-<h2>Scan QR Code</h2>
-<div id="reader" style="width:300px;"></div>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Scan QR</title>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+</head>
+<body>
+    <h2>Scan QR Code</h2>
 
-<script>
-function onScanSuccess(decodedText, decodedResult) {
-    window.location.href = "/add/" + decodedText;
-}
+    <div id="reader" style="width:300px;"></div>
 
-var html5QrCode = new Html5Qrcode("reader");
-html5QrCode.start(
-    { facingMode: "environment" },
-    { fps: 10 },
-    onScanSuccess
-);
-</script>
+    <script>
+        function onScanSuccess(decodedText) {
+            window.location.href = "/add-ui/" + decodedText;
+        }
+
+        const scanner = new Html5Qrcode("reader");
+        scanner.start(
+            { facingMode: "environment" },
+            { fps: 10 },
+            onScanSuccess
+        );
+    </script>
+
+    <br>
+    <a href="/">⬅ Back</a>
+</body>
+</html>
