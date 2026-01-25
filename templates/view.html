@@ -1,28 +1,18 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Passenger Details</title>
-    <style>
-        body { font-family: Arial, sans-serif; padding: 50px; max-width: 600px; margin: auto; }
-        h1 { text-align: center; }
-        table { width: 100%; border-collapse: collapse; }
-        td, th { border: 1px solid #ddd; padding: 10px; }
-        th { background-color: #f2f2f2; }
-    </style>
+    <title>Details</title>
 </head>
 <body>
-    <h1>Passenger Details</h1>
-    <table>
-        <tr><th>QR Code</th><td>{{ passenger.qr_code }}</td></tr>
-        <tr><th>Name</th><td>{{ passenger.name }}</td></tr>
-        <tr><th>Address</th><td>{{ passenger.address }}</td></tr>
-        <tr><th>Phone</th><td>{{ passenger.phone }}</td></tr>
-        <tr><th>Father</th><td>{{ passenger.father }}</td></tr>
-        <tr><th>Mother</th><td>{{ passenger.mother }}</td></tr>
-        <tr><th>Filled At</th><td>{{ passenger.filled_at }}</td></tr>
-    </table>
-    <br>
-    <a href="/">Back to Home</a>
+    <h3>Passenger Details</h3>
+
+    <img src="/qr-image/{{ passenger.qr_code }}" width="200"><br><br>
+
+    <p><b>Name:</b> {{ passenger.name }}</p>
+    <p><b>Father:</b> {{ passenger.father }}</p>
+    <p><b>Mother:</b> {{ passenger.mother }}</p>
+    <p><b>Phone:</b> {{ passenger.phone }}</p>
+    <p><b>Address:</b> {{ passenger.address }}</p>
+    <p><b>Filled At:</b> {{ passenger.filled_at }}</p>
 </body>
 </html>
