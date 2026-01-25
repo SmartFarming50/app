@@ -1,6 +1,5 @@
 Flask
 mysql-connector-python
 qrcode
-opencv-python-headless
-numpy
-pyzbar
+Pillow
+python-dotenv
