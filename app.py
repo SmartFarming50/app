@@ -6,17 +6,19 @@ from urllib.parse import urlparse
 from datetime import datetime
 import qrcode
 from io import BytesIO
+import cv2
+import numpy as np
+from pyzbar.pyzbar import decode
 
 app = Flask(__name__)
 
-# ---------------- DB CONNECTION ----------------
+# ---------------- DATABASE CONNECTION ----------------
 def get_db():
     db_url = os.environ.get("MYSQL_PUBLIC_URL")
     if not db_url:
-        raise Exception("MYSQL_PUBLIC_URL environment variable not set")
-    
-    url = urlparse(db_url)
+        raise Exception("MYSQL_PUBLIC_URL not set")
 
+    url = urlparse(db_url)
     for _ in range(5):
         try:
             return mysql.connector.connect(
@@ -30,29 +32,25 @@ def get_db():
         except mysql.connector.Error as e:
             print("Waiting for DB...", e)
             time.sleep(5)
-    
     raise Exception("DB connection failed")
 
-# ---------------- HOME PAGE ----------------
+# ---------------- HOME ----------------
 @app.route("/")
 def home():
     return render_template("home.html")
 
-
+# ---------------- ADMIN PANEL ----------------
 @app.route("/admin-ui")
 def admin_ui():
     db = get_db()
     cur = db.cursor(dictionary=True)
-
     cur.execute("SELECT * FROM qr_data ORDER BY id ASC")
     qr_list = cur.fetchall()
-
     cur.close()
     db.close()
     return render_template("admin.html", qr_list=qr_list)
 
-
-# ---------------- GENERATE QR CODES ----------------
+# ---------------- GENERATE QR ----------------
 @app.route("/admin", methods=["POST"])
 def admin_generate():
     count = int(request.form.get("count", 1))
@@ -60,13 +58,13 @@ def admin_generate():
 
     db = get_db()
     cur = db.cursor()
-
-    # Get last id
     cur.execute("SELECT IFNULL(MAX(id), 0) FROM qr_data")
     last_id = cur.fetchone()[0]
 
     for i in range(1, count + 1):
         qr_code = f"RAIL-{last_id + i}"
+
+        # Insert QR record into database
         cur.execute("""
             INSERT INTO qr_data (qr_code, status, created_at)
             VALUES (%s, %s, %s)
@@ -75,52 +73,54 @@ def admin_generate():
     db.commit()
     cur.close()
     db.close()
+    return "QR codes generated successfully"
 
-    return f"{count} QR codes generated successfully"
+# ---------------- GENERATE QR IMAGE ON THE FLY ----------------
+@app.route("/qr-image/<qr_code>")
+def qr_image(qr_code):
+    img = qrcode.make(qr_code)
+    buf = BytesIO()
+    img.save(buf, format="PNG")
+    buf.seek(0)
+    return send_file(buf, mimetype="image/png")
 
-# ---------------- ADD NEXT UNUSED QR ----------------
-@app.route("/add-next")
-def add_next():
-    db = get_db()
-    cur = db.cursor(dictionary=True)
+# ---------------- SCAN PAGE ----------------
+@app.route("/scan", methods=["GET", "POST"])
+def scan():
+    if request.method == "POST":
+        # Handle uploaded QR image
+        file = request.files.get("qr_image")
+        if not file:
+            return "No file uploaded"
 
-    cur.execute("""
-        SELECT qr_code FROM qr_data
-        WHERE status IS NULL OR status != 'USED'
-        ORDER BY id ASC
-        LIMIT 1
-    """)
-    qr = cur.fetchone()
+        img_bytes = np.frombuffer(file.read(), np.uint8)
+        img = cv2.imdecode(img_bytes, cv2.IMREAD_COLOR)
 
-    cur.close()
-    db.close()
+        decoded_objects = decode(img)
+        if not decoded_objects:
+            return "No QR code detected in image"
 
-    if not qr:
-        return "No pending QR available"
+        qr_code = decoded_objects[0].data.decode("utf-8")
+        return redirect(f"/add-ui/{qr_code}")
 
-    return redirect(f"/add-ui/{qr['qr_code']}")
+    return render_template("scan.html")
 
-# ---------------- ADD / FILL PASSENGER DETAILS ----------------
+# ---------------- ADD OR VIEW PASSENGER DETAILS ----------------
 @app.route("/add-ui/<qr_code>", methods=["GET", "POST"])
 def add_ui(qr_code):
     db = get_db()
     cur = db.cursor(dictionary=True)
 
+    # Fetch QR record
     cur.execute("SELECT * FROM qr_data WHERE qr_code=%s", (qr_code,))
     qr = cur.fetchone()
-
     if not qr:
         cur.close()
         db.close()
         return "INVALID QR"
 
-    # If already filled, redirect to view
-    if qr["status"] == "USED":
-        cur.close()
-        db.close()
-        return redirect(f"/view/{qr_code}")
-
     if request.method == "POST":
+        # Save passenger details
         d = request.form
         filled_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
@@ -144,49 +144,33 @@ def add_ui(qr_code):
             "USED",
             qr_code
         ))
-
         db.commit()
         cur.close()
         db.close()
-        return f"Passenger details saved successfully for {qr_code}"
+        return "Passenger details saved successfully"
 
     cur.close()
     db.close()
-    return render_template("add.html", qr_code=qr_code)
+
+    # GET request → show add form or details if already filled
+    return render_template("add.html", qr=qr)
 
 # ---------------- VIEW PASSENGER DETAILS ----------------
 @app.route("/view/<qr_code>")
 def view_passenger(qr_code):
     db = get_db()
     cur = db.cursor(dictionary=True)
-
     cur.execute("SELECT * FROM qr_data WHERE qr_code=%s", (qr_code,))
     passenger = cur.fetchone()
-
     cur.close()
     db.close()
 
     if not passenger:
-        return "No data found for this QR"
+        return "No data found"
 
     return render_template("view.html", passenger=passenger)
-
-# ---------------- SCAN PAGE (LIVE CAMERA) ----------------
-@app.route("/scan")
-def scan():
-    return render_template("scan.html")
-
-# ---------------- GENERATE QR IMAGE FROM TEXT ----------------
-@app.route("/qr-image/<qr_code>")
-def qr_image(qr_code):
-    img = qrcode.make(qr_code)
-    buf = BytesIO()
-    img.save(buf, format="PNG")
-    buf.seek(0)
-    return send_file(buf, mimetype="image/png")
 
 # ---------------- START APP ----------------
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8080))
     app.run(host="0.0.0.0", port=port)
-
