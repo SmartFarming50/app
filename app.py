@@ -95,7 +95,7 @@ def add_ui(qr_code):
         return "INVALID QR"
 
     if qr["status"] == "USED":
-        return "QR ALREADY USED"
+        return redirect(f"/view/{qr_code}")
 
     if request.method == "POST":
         d = request.form
@@ -175,4 +175,5 @@ def add_next():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8080))
     app.run(host="0.0.0.0", port=port)
+
 
