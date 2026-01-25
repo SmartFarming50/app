@@ -2,42 +2,18 @@
 <html>
 <head>
     <title>Scan QR</title>
-    <script src="https://unpkg.com/html5-qrcode"></script>
 </head>
 <body>
-    <h2>Scan QR Code</h2>
+    <h2>Scan QR</h2>
 
-    <!-- LIVE CAMERA SCANNER -->
-    <div id="reader" style="width:300px;height:300px;"></div>
-    <p id="result"></p>
+    <input id="qr" placeholder="Enter QR Code">
+    <button onclick="go()">Open</button>
 
     <script>
-        function onScanSuccess(decodedText, decodedResult) {
-            html5QrcodeScanner.clear().then(_ => {
-                window.location.href = "/add-ui/" + decodedText;
-            }).catch(err => {
-                console.error(err);
-            });
+        function go() {
+            const qr = document.getElementById("qr").value;
+            window.location.href = "/add-ui/" + qr;
         }
-
-        function onScanFailure(error) {}
-
-        let html5QrcodeScanner = new Html5Qrcode("reader");
-        const config = { fps: 10, qrbox: 250 };
-
-        html5QrcodeScanner.start(
-            { facingMode: "environment" },
-            config,
-            onScanSuccess,
-            onScanFailure
-        );
     </script>
-
-    <hr>
-    <h3>Or Upload QR Image</h3>
-    <form method="POST" enctype="multipart/form-data">
-        <input type="file" name="qr_image" accept="image/*" required>
-        <button type="submit">Scan Image</button>
-    </form>
 </body>
 </html>
