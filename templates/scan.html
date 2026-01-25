@@ -1,19 +1,39 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Scan QR</title>
+    <title>Scan QR Live</title>
+    <script src="https://unpkg.com/html5-qrcode"></script>
 </head>
 <body>
-    <h2>Scan QR</h2>
-
-    <input id="qr" placeholder="Enter QR Code">
-    <button onclick="go()">Open</button>
+    <h2>Live QR Scanner</h2>
+    <div id="reader" style="width:300px;height:300px;"></div>
+    <p id="result"></p>
 
     <script>
-        function go() {
-            const qr = document.getElementById("qr").value;
-            window.location.href = "/add-ui/" + qr;
+        function onScanSuccess(decodedText, decodedResult) {
+            // Stop scanning after first QR
+            html5QrcodeScanner.clear().then(_ => {
+                // Redirect to backend with decoded QR
+                window.location.href = "/add-ui/" + decodedText;
+            }).catch(error => {
+                console.error("Failed to clear scanner", error);
+            });
         }
+
+        function onScanFailure(error) {
+            // Do nothing on scan failure
+        }
+
+        let html5QrcodeScanner = new Html5Qrcode("reader");
+
+        const config = { fps: 10, qrbox: 250 };
+
+        html5QrcodeScanner.start(
+            { facingMode: "environment" }, // rear camera
+            config,
+            onScanSuccess,
+            onScanFailure
+        );
     </script>
 </body>
 </html>
