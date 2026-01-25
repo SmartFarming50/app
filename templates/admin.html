@@ -1,5 +1,18 @@
-<h2>Generate QR Codes</h2>
-<form method="post">
-    <input type="number" name="count" placeholder="Number of QR codes" required>
-    <button type="submit">Generate</button>
-</form>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Panel</title>
+</head>
+<body>
+    <h2>Generate QR Codes</h2>
+
+    <form method="post" action="/admin">
+        <input type="number" name="count" placeholder="Enter count" min="1" required>
+        <br><br>
+        <button type="submit">Generate QR</button>
+    </form>
+
+    <br>
+    <a href="/">⬅ Back</a>
+</body>
+</html>
