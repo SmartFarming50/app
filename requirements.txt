@@ -1,6 +1,6 @@
-Flask==2.3.3
-mysql-connector-python==8.1.0
-qrcode==7.4.2
-opencv-python-headless==4.8.0.74
-numpy==1.26.4
-pyzbar==0.1.9
+Flask
+mysql-connector-python
+qrcode
+opencv-python-headless
+numpy
+pyzbar
