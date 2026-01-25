@@ -6,6 +6,9 @@ from urllib.parse import urlparse
 from datetime import datetime
 import qrcode
 from io import BytesIO
+from reportlab.lib.pagesizes import A4
+from reportlab.pdfgen import canvas
+from reportlab.lib.units import inch
 
 app = Flask(__name__)
 
@@ -190,10 +193,74 @@ def qr_image(qr_code):
     buf.seek(0)
     return send_file(buf, mimetype="image/png")
 
+@app.route("/admin/download-qr-pdf")
+def download_qr_pdf():
+    db = get_db()
+    cur = db.cursor(dictionary=True)
+
+    cur.execute("SELECT qr_code FROM qr_data ORDER BY id ASC")
+    qr_list = cur.fetchall()
+
+    cur.close()
+    db.close()
+
+    if not qr_list:
+        return "No QR codes found"
+
+    buffer = BytesIO()
+    pdf = canvas.Canvas(buffer, pagesize=A4)
+
+    width, height = A4
+    x = 1 * inch
+    y = height - 1 * inch
+
+    qr_size = 2 * inch
+    gap = 0.5 * inch
+
+    for i, qr in enumerate(qr_list):
+        qr_code = qr["qr_code"]
+        qr_url = f"{request.host_url.rstrip('/')}/view/{qr_code}"
+
+        qr_img = qrcode.make(qr_url)
+        img_buffer = BytesIO()
+        qr_img.save(img_buffer, format="PNG")
+        img_buffer.seek(0)
+
+        pdf.drawInlineImage(
+            img_buffer,
+            x,
+            y - qr_size,
+            qr_size,
+            qr_size
+        )
+
+        pdf.drawString(x, y - qr_size - 15, qr_code)
+
+        x += qr_size + gap
+
+        if x + qr_size > width:
+            x = 1 * inch
+            y -= qr_size + 1 * inch
+
+        if y < 2 * inch:
+            pdf.showPage()
+            x = 1 * inch
+            y = height - 1 * inch
+
+    pdf.save()
+    buffer.seek(0)
+
+    return send_file(
+        buffer,
+        as_attachment=True,
+        download_name="all_qr_codes.pdf",
+        mimetype="application/pdf"
+    )
 
 # ---------------- START APP ----------------
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8080))
     app.run(host="0.0.0.0", port=port)
+
 
 
