@@ -3,10 +3,11 @@ import mysql.connector
 import os
 import time
 from urllib.parse import urlparse
+from datetime import datetime
 
 app = Flask(__name__)
 
-# ---------------- DATABASE CONNECTION ----------------
+# ---------------- DB CONNECTION ----------------
 def get_db():
     db_url = os.environ.get("MYSQL_PUBLIC_URL")
     url = urlparse(db_url)
@@ -37,32 +38,36 @@ def home():
 def admin_ui():
     return render_template("admin.html")
 
-# ---------------- ADMIN GENERATE QR (TEXT ONLY) ----------------
+# ---------------- GENERATE QR ----------------
 @app.route("/admin", methods=["POST"])
 def admin_generate():
     count = int(request.form.get("count", 1))
+    now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     db = get_db()
     cur = db.cursor()
 
-    cur.execute("SELECT IFNULL(MAX(id), 0) FROM qr_master")
+    cur.execute("SELECT IFNULL(MAX(id), 0) FROM qr_data")
     last_id = cur.fetchone()[0]
 
     for i in range(1, count + 1):
         qr_code = f"RAIL-{last_id + i}"
 
-        # ✅ TEXT ONLY — NO IMAGE
-        cur.execute(
-            "INSERT INTO qr_master (qr_code) VALUES (%s)",
-            (qr_code,)
-        )
+        cur.execute("""
+            INSERT INTO qr_data (qr_code, status, created_at)
+            VALUES (%s, %s, %s)
+        """, (
+            qr_code,
+            "UNUSED",
+            now
+        ))
 
     db.commit()
     cur.close()
     db.close()
     return "QR codes generated successfully"
 
-# ---------------- SCAN ----------------
+# ---------------- SCAN PAGE ----------------
 @app.route("/scan")
 def scan():
     return render_template("scan.html")
@@ -73,7 +78,10 @@ def add_ui(qr_code):
     db = get_db()
     cur = db.cursor(dictionary=True)
 
-    cur.execute("SELECT status FROM qr_master WHERE qr_code=%s", (qr_code,))
+    cur.execute(
+        "SELECT * FROM qr_data WHERE qr_code=%s",
+        (qr_code,)
+    )
     qr = cur.fetchone()
 
     if not qr:
@@ -84,42 +92,46 @@ def add_ui(qr_code):
 
     if request.method == "POST":
         d = request.form
+        filled_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
         cur.execute("""
-            INSERT INTO passenger_details
-            (qr_code, name, address, phone, father, mother, filled_at)
-            VALUES (%s,%s,%s,%s,%s,%s,NOW())
+            UPDATE qr_data
+            SET name=%s,
+                father=%s,
+                mother=%s,
+                phone=%s,
+                address=%s,
+                filled_at=%s,
+                status=%s
+            WHERE qr_code=%s
         """, (
-            qr_code,
             d.get("name"),
-            d.get("address"),
-            d.get("phone"),
             d.get("father"),
-            d.get("mother")
+            d.get("mother"),
+            d.get("phone"),
+            d.get("address"),
+            filled_time,
+            "USED",
+            qr_code
         ))
-
-        cur.execute(
-            "UPDATE qr_master SET status='USED' WHERE qr_code=%s",
-            (qr_code,)
-        )
 
         db.commit()
         cur.close()
         db.close()
-        return "Passenger saved successfully"
+        return "Passenger details saved successfully"
 
     cur.close()
     db.close()
     return render_template("add.html", qr_code=qr_code)
 
-# ---------------- VIEW PASSENGER ----------------
+# ---------------- VIEW DETAILS ----------------
 @app.route("/view/<qr_code>")
 def view_passenger(qr_code):
     db = get_db()
     cur = db.cursor(dictionary=True)
 
     cur.execute(
-        "SELECT * FROM passenger_details WHERE qr_code=%s",
+        "SELECT * FROM qr_data WHERE qr_code=%s",
         (qr_code,)
     )
     passenger = cur.fetchone()
@@ -128,7 +140,7 @@ def view_passenger(qr_code):
     db.close()
 
     if not passenger:
-        return "No passenger found"
+        return "No data found"
 
     return render_template("view.html", passenger=passenger)
 
