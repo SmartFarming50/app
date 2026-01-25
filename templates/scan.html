@@ -1,28 +1,31 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
     <title>Scan QR</title>
-    <script src="https://unpkg.com/html5-qrcode"></script>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; padding: 50px; }
+        input, button { padding: 10px; margin: 10px; font-size: 16px; }
+    </style>
 </head>
 <body>
-    <h2>Scan QR Code</h2>
-
-    <div id="reader" style="width:300px;"></div>
+    <h1>Scan QR / Enter QR Code</h1>
+    <form action="" method="get" onsubmit="redirectToAdd(); return false;">
+        <label>Enter QR Code:</label>
+        <input type="text" id="qr_code" required>
+        <br>
+        <button type="submit">Go</button>
+    </form>
+    <br>
+    <a href="/">Back to Home</a>
 
     <script>
-        function onScanSuccess(decodedText) {
-            window.location.href = "/add-ui/" + decodedText;
+        function redirectToAdd() {
+            const qr = document.getElementById('qr_code').value.trim();
+            if (qr) {
+                window.location.href = `/add-ui/${qr}`;
+            }
         }
-
-        const scanner = new Html5Qrcode("reader");
-        scanner.start(
-            { facingMode: "environment" },
-            { fps: 10 },
-            onScanSuccess
-        );
     </script>
-
-    <br>
-    <a href="/">⬅ Back</a>
 </body>
 </html>
