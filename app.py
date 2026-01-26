@@ -141,49 +141,30 @@ def admin_generate():
     return f"{count} QR codes generated successfully"
 
 # ---------------- ADD NEXT UNUSED QR ----------------
-@app.route("/add-next")
-def add_next():
-    db = get_db()
-    cur = db.cursor(dictionary=True)
-
-    cur.execute("""
-        SELECT qr_code FROM qr_data
-        WHERE status IS NULL OR status != 'USED'
-        ORDER BY id ASC
-        LIMIT 1
-    """)
-    qr = cur.fetchone()
-
-    cur.close()
-    db.close()
-
-    if not qr:
-        return "No pending QR available"
-
-    return redirect(f"/add-ui/{qr['qr_code']}")
 
 # ---------------- ADD / FILL PASSENGER DETAILS ----------------
-@app.route("/add-ui/<qr_code>", methods=["GET", "POST"])
-def add_ui(qr_code):
-    db = get_db()
-    cur = db.cursor(dictionary=True)
-
-    cur.execute("SELECT * FROM qr_data WHERE qr_code=%s", (qr_code,))
-    qr = cur.fetchone()
-
-    if not qr:
-        cur.close()
-        db.close()
-        return "INVALID QR"
-
-    # If already filled, redirect to view
-    if qr["status"] == "USED":
-        cur.close()
-        db.close()
-        return redirect(f"/view/{qr_code}")
-
+@app.route("/add-ui", methods=["GET", "POST"])
+def add_ui():
     if request.method == "POST":
-        d = request.form
+        qr_code = request.form.get("qr_code").strip()
+
+        db = get_db()
+        cur = db.cursor(dictionary=True)
+
+        # Check if QR exists
+        cur.execute("SELECT * FROM qr_data WHERE qr_code=%s", (qr_code,))
+        qr = cur.fetchone()
+
+        if not qr:
+            cur.close()
+            db.close()
+            return "INVALID QR CODE"
+
+        if qr["status"] == "USED":
+            cur.close()
+            db.close()
+            return redirect(f"/view/{qr_code}")
+
         filled_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
         cur.execute("""
@@ -194,27 +175,26 @@ def add_ui(qr_code):
                 phone=%s,
                 address=%s,
                 filled_at=%s,
-                status=%s
+                status='USED'
             WHERE qr_code=%s
         """, (
-            d.get("name"),
-            d.get("father"),
-            d.get("mother"),
-            d.get("phone"),
-            d.get("address"),
+            request.form.get("name"),
+            request.form.get("father"),
+            request.form.get("mother"),
+            request.form.get("phone"),
+            request.form.get("address"),
             filled_time,
-            "USED",
             qr_code
         ))
 
         db.commit()
         cur.close()
         db.close()
+
         return f"Passenger details saved successfully for {qr_code}"
 
-    cur.close()
-    db.close()
-    return render_template("add.html", qr_code=qr_code)
+    return render_template("add.html")
+
 
 # ---------------- VIEW PASSENGER DETAILS ----------------
 @app.route("/view/<qr_code>")
@@ -254,6 +234,7 @@ def qr_image(qr_code):
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8080))
     app.run(host="0.0.0.0", port=port)
+
 
 
 
