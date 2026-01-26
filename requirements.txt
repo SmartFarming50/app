@@ -4,4 +4,3 @@ qrcode
 Pillow
 python-dotenv
 reportlab
-gunicorn
