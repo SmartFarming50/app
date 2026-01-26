@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <title>Passenger Details</title>
 
-    <!-- Google Font -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
 
     <style>
@@ -23,70 +22,45 @@
         }
 
         .card {
-            background: #ffffff;
+            background: #fff;
             width: 100%;
             max-width: 450px;
             padding: 30px;
             border-radius: 12px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 20px 40px rgba(0,0,0,.15);
         }
 
-        .card h2 {
+        h2 {
             text-align: center;
             margin-bottom: 20px;
-            color: #333;
         }
 
         label {
             font-size: 14px;
-            color: #444;
             font-weight: 500;
         }
 
         input, textarea {
             width: 100%;
-            padding: 10px 12px;
-            margin-top: 6px;
-            margin-bottom: 18px;
+            padding: 10px;
+            margin: 6px 0 16px;
             border: 1px solid #ddd;
             border-radius: 6px;
-            font-size: 14px;
-            transition: 0.3s;
-        }
-
-        input:focus, textarea:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.15);
-        }
-
-        textarea {
-            resize: none;
         }
 
         button {
             width: 100%;
             padding: 12px;
-            border: none;
-            border-radius: 8px;
             background: #667eea;
             color: #fff;
+            border: none;
+            border-radius: 8px;
             font-size: 16px;
-            font-weight: 500;
             cursor: pointer;
-            transition: 0.3s;
         }
 
         button:hover {
             background: #5a6fdc;
-            transform: translateY(-1px);
-        }
-
-        @media (max-width: 480px) {
-            .card {
-                margin: 20px;
-                padding: 25px;
-            }
         }
     </style>
 </head>
@@ -96,9 +70,8 @@
     <h2>Passenger Details</h2>
 
     <form method="POST" action="/add-ui">
-
         <label>QR Code</label>
-        <input type="text" name="qr_code" placeholder="e.g. RAIL-123" required>
+        <input type="text" name="qr_code" placeholder="RAIL-1" required>
 
         <label>Name</label>
         <input type="text" name="name" required>
@@ -109,7 +82,7 @@
         <label>Mother Name</label>
         <input type="text" name="mother" required>
 
-        <label>Phone Number</label>
+        <label>Phone</label>
         <input type="text" name="phone" required>
 
         <label>Address</label>
