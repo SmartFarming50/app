@@ -101,29 +101,44 @@
     </style>
 </head>
 <body>
+    <h2>QR Code: {{ qr_code }}</h2>
     <form method="POST">
-    <label>QR Code</label>
-    <input type="text" value="{{ qr_code }}" disabled>
+        <label>Name:</label><br>
+        <input type="text" name="name" required><br><br>
 
-    <input type="hidden" name="qr_code" value="{{ qr_code }}">
+        <label>Father:</label><br>
+        <input type="text" name="father" required><br><br>
+    <div class="card">
+        <h2>Passenger Details</h2>
+        <div class="qr">QR Code: {{ qr_code }}</div>
 
-    <label>Name</label>
-    <input type="text" name="name" required>
+        <form method="POST">
+            <label>Name</label>
+            <input type="text" name="name" required>
 
-    <label>Father Name</label>
-    <input type="text" name="father" required>
+            <label>Father</label>
+            <input type="text" name="father" required>
 
-    <label>Mother Name</label>
-    <input type="text" name="mother" required>
+            <label>Mother</label>
+            <input type="text" name="mother" required>
 
-    <label>Phone</label>
-    <input type="text" name="phone" required>
+        <label>Mother:</label><br>
+        <input type="text" name="mother" required><br><br>
+            <label>Phone</label>
+            <input type="text" name="phone" required>
 
-    <label>Address</label>
-    <textarea name="address" rows="4" required></textarea>
+        <label>Phone:</label><br>
+        <input type="text" name="phone" required><br><br>
+            <label>Address</label>
+            <textarea name="address" rows="4" required></textarea>
 
-    <button type="submit">Save Details</button>
-</form>
+        <label>Address:</label><br>
+        <textarea name="address" rows="4" cols="50" required></textarea><br><br>
+            <button type="submit">Save Details</button>
+        </form>
+    </div>
 
+        <button type="submit">Save</button>
+    </form>
 </body>
 </html>
