@@ -105,23 +105,27 @@
         <div class="qr">QR Code: {{ qr_code }}</div>
 
         <form method="POST">
-            <label>Name</label>
-            <input type="text" name="name" required>
+    <label>QR Code</label>
+    <input type="text" name="qr_code" required placeholder="RAIL-123">
 
-            <label>Father</label>
-            <input type="text" name="father" required>
+    <label>Name</label>
+    <input type="text" name="name" required>
 
-            <label>Mother</label>
-            <input type="text" name="mother" required>
+    <label>Father</label>
+    <input type="text" name="father" required>
 
-            <label>Phone</label>
-            <input type="text" name="phone" required>
+    <label>Mother</label>
+    <input type="text" name="mother" required>
 
-            <label>Address</label>
-            <textarea name="address" rows="4" required></textarea>
+    <label>Phone</label>
+    <input type="text" name="phone" required>
 
-            <button type="submit">Save Details</button>
-        </form>
+    <label>Address</label>
+    <textarea name="address" rows="4" required></textarea>
+
+    <button type="submit">Save Details</button>
+</form>
+
     </div>
 
 </body>
