@@ -33,16 +33,8 @@
 
         .card h2 {
             text-align: center;
-            margin-bottom: 10px;
+            margin-bottom: 20px;
             color: #333;
-        }
-
-        .qr {
-            text-align: center;
-            font-size: 14px;
-            color: #666;
-            margin-bottom: 25px;
-            word-break: break-all;
         }
 
         label {
@@ -100,33 +92,32 @@
 </head>
 <body>
 
-    <div class="card">
-        <h2>Passenger Details</h2>
-        
+<div class="card">
+    <h2>Passenger Details</h2>
 
-        <form method="POST">
-    <label>QR Code</label>
-    <input type="text" name="qr_code" required placeholder="etc:RAIL-123">
+    <form method="POST" action="/add-ui">
 
-    <label>Name</label>
-    <input type="text" name="name" required>
+        <label>QR Code</label>
+        <input type="text" name="qr_code" placeholder="e.g. RAIL-123" required>
 
-    <label>Father</label>
-    <input type="text" name="father" required>
+        <label>Name</label>
+        <input type="text" name="name" required>
 
-    <label>Mother</label>
-    <input type="text" name="mother" required>
+        <label>Father Name</label>
+        <input type="text" name="father" required>
 
-    <label>Phone</label>
-    <input type="text" name="phone" required>
+        <label>Mother Name</label>
+        <input type="text" name="mother" required>
 
-    <label>Address</label>
-    <textarea name="address" rows="4" required></textarea>
+        <label>Phone Number</label>
+        <input type="text" name="phone" required>
 
-    <button type="submit">Save Details</button>
-</form>
+        <label>Address</label>
+        <textarea name="address" rows="4" required></textarea>
 
-    </div>
+        <button type="submit">Save Details</button>
+    </form>
+</div>
 
 </body>
 </html>
