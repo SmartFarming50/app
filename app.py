@@ -200,47 +200,49 @@ def add_next():
 # --------------------------------------------------
 # ADD / FILL PASSENGER DETAILS
 # --------------------------------------------------
-@app.route("/add-ui/<qr_code>", methods=["GET", "POST"])
-def add_ui(qr_code):
-    db = get_db()
-    cur = db.cursor(dictionary=True)
-
-    cur.execute("SELECT * FROM qr_data WHERE qr_code=%s", (qr_code,))
-    qr = cur.fetchone()
-
-    if not qr:
-        cur.close()
-        db.close()
-        return "INVALID QR"
-
-    if qr["status"] == "USED":
-        cur.close()
-        db.close()
-        return redirect(f"/view/{qr_code}")
-
+@app.route("/add-ui", methods=["GET", "POST"])
+def add_ui():
     if request.method == "POST":
-        data = request.form
+        qr_code = request.form.get("qr_code").strip()
+
+        db = get_db()
+        cur = db.cursor(dictionary=True)
+
+        # Check if QR exists
+        cur.execute("SELECT * FROM qr_data WHERE qr_code=%s", (qr_code,))
+        qr = cur.fetchone()
+
+        if not qr:
+            cur.close()
+            db.close()
+            return "INVALID QR CODE"
+
+        if qr["status"] == "USED":
+            cur.close()
+            db.close()
+            return redirect(f"/view/{qr_code}")
+
         filled_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-        cur.execute(
-            """
+        cur.execute("""
             UPDATE qr_data
-            SET name=%s, father=%s, mother=%s,
-                phone=%s, address=%s,
-                filled_at=%s, status=%s
+            SET name=%s,
+                father=%s,
+                mother=%s,
+                phone=%s,
+                address=%s,
+                filled_at=%s,
+                status='USED'
             WHERE qr_code=%s
-            """,
-            (
-                data.get("name"),
-                data.get("father"),
-                data.get("mother"),
-                data.get("phone"),
-                data.get("address"),
-                filled_time,
-                "USED",
-                qr_code
-            )
-        )
+        """, (
+            request.form.get("name"),
+            request.form.get("father"),
+            request.form.get("mother"),
+            request.form.get("phone"),
+            request.form.get("address"),
+            filled_time,
+            qr_code
+        ))
 
         db.commit()
         cur.close()
@@ -248,14 +250,8 @@ def add_ui(qr_code):
 
         return f"Passenger details saved successfully for {qr_code}"
 
-    cur.close()
-    db.close()
-    return render_template("add.html", qr_code=qr_code)
+    return render_template("add.html")
 
-
-# --------------------------------------------------
-# VIEW PASSENGER DETAILS
-# --------------------------------------------------
 @app.route("/view/<qr_code>")
 def view_passenger(qr_code):
     db = get_db()
@@ -302,3 +298,4 @@ def qr_image(qr_code):
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8080))
     app.run(host="0.0.0.0", port=port)
+
