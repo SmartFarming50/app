@@ -101,14 +101,7 @@
     </style>
 </head>
 <body>
-    <h2>QR Code: {{ qr_code }}</h2>
-    <form method="POST">
-        <label>Name:</label><br>
-        <input type="text" name="name" required><br><br>
-
-        <label>Father:</label><br>
-        <input type="text" name="father" required><br><br>
-    <div class="card">
+      <div class="card">
         <h2>Passenger Details</h2>
         <div class="qr">QR Code: {{ qr_code }}</div>
 
@@ -138,7 +131,5 @@
         </form>
     </div>
 
-        <button type="submit">Save</button>
-    </form>
 </body>
 </html>
