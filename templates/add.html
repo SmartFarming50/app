@@ -1,8 +1,6 @@
 <!DOCTYPE html>
-<html>
 <html lang="en">
 <head>
-    <title>Fill Passenger Details</title>
     <meta charset="UTF-8">
     <title>Passenger Details</title>
 
@@ -35,16 +33,8 @@
 
         .card h2 {
             text-align: center;
-            margin-bottom: 10px;
+            margin-bottom: 20px;
             color: #333;
-        }
-
-        .qr {
-            text-align: center;
-            font-size: 14px;
-            color: #666;
-            margin-bottom: 25px;
-            word-break: break-all;
         }
 
         label {
@@ -101,35 +91,33 @@
     </style>
 </head>
 <body>
-      <div class="card">
-        <h2>Passenger Details</h2>
-        <div class="qr">QR Code: {{ qr_code }}</div>
 
-        <form method="POST">
-            <label>Name</label>
-            <input type="text" name="name" required>
+<div class="card">
+    <h2>Passenger Details</h2>
 
-            <label>Father</label>
-            <input type="text" name="father" required>
+    <form method="POST" action="/add-ui">
 
-            <label>Mother</label>
-            <input type="text" name="mother" required>
+        <label>QR Code</label>
+        <input type="text" name="qr_code" placeholder="e.g. RAIL-123" required>
 
-        <label>Mother:</label><br>
-        <input type="text" name="mother" required><br><br>
-            <label>Phone</label>
-            <input type="text" name="phone" required>
+        <label>Name</label>
+        <input type="text" name="name" required>
 
-        <label>Phone:</label><br>
-        <input type="text" name="phone" required><br><br>
-            <label>Address</label>
-            <textarea name="address" rows="4" required></textarea>
+        <label>Father Name</label>
+        <input type="text" name="father" required>
 
-        <label>Address:</label><br>
-        <textarea name="address" rows="4" cols="50" required></textarea><br><br>
-            <button type="submit">Save Details</button>
-        </form>
-    </div>
+        <label>Mother Name</label>
+        <input type="text" name="mother" required>
+
+        <label>Phone Number</label>
+        <input type="text" name="phone" required>
+
+        <label>Address</label>
+        <textarea name="address" rows="4" required></textarea>
+
+        <button type="submit">Save Details</button>
+    </form>
+</div>
 
 </body>
 </html>
