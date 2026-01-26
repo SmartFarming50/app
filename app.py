@@ -97,61 +97,7 @@ def download_qr_pdf():
 @app.route("/")
 def home():
     return render_template("home.html")
-@app.route("/add-by-qr", methods=["GET", "POST"])
-def add_by_qr():
-    if request.method == "POST":
-        d = request.form
-        qr_code = d.get("qr_code")
 
-        db = get_db()
-        cur = db.cursor(dictionary=True)
-
-        # Check QR exists
-        cur.execute("SELECT * FROM qr_data WHERE qr_code=%s", (qr_code,))
-        qr = cur.fetchone()
-
-        if not qr:
-            cur.close()
-            db.close()
-            return "INVALID QR CODE"
-
-        if qr["status"] == "USED":
-            cur.close()
-            db.close()
-            return "QR CODE ALREADY USED"
-
-        filled_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
-        cur.execute("""
-            UPDATE qr_data
-            SET name=%s,
-                father=%s,
-                mother=%s,
-                phone=%s,
-                address=%s,
-                filled_at=%s,
-                status=%s
-            WHERE qr_code=%s
-        """, (
-            d.get("name"),
-            d.get("father"),
-            d.get("mother"),
-            d.get("phone"),
-            d.get("address"),
-            filled_time,
-            "USED",
-            qr_code
-        ))
-
-        db.commit()
-        cur.close()
-        db.close()
-
-        return f"Passenger details saved successfully for {qr_code}"
-
-    return render_template("add.html")
-
-# ---------------- ADMIN PANEL ----------------
 # ---------------- ADMIN PANEL ----------------
 @app.route("/admin-ui")
 def admin_ui():
@@ -308,6 +254,7 @@ def qr_image(qr_code):
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8080))
     app.run(host="0.0.0.0", port=port)
+
 
 
 
