@@ -1,96 +1,32 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
     <title>Passenger Details</title>
-
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
-
-    <style>
-        * {
-            box-sizing: border-box;
-            font-family: 'Poppins', sans-serif;
-        }
-
-        body {
-            margin: 0;
-            min-height: 100vh;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .card {
-            background: #fff;
-            width: 100%;
-            max-width: 450px;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 20px 40px rgba(0,0,0,.15);
-        }
-
-        h2 {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        label {
-            font-size: 14px;
-            font-weight: 500;
-        }
-
-        input, textarea {
-            width: 100%;
-            padding: 10px;
-            margin: 6px 0 16px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-        }
-
-        button {
-            width: 100%;
-            padding: 12px;
-            background: #667eea;
-            color: #fff;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            cursor: pointer;
-        }
-
-        button:hover {
-            background: #5a6fdc;
-        }
-    </style>
 </head>
 <body>
+<h2>Passenger Details</h2>
 
-<div class="card">
-    <h2>Passenger Details</h2>
+<form method="POST" action="/add-ui">
 
-    <form method="POST" action="/add-ui">
-        <label>QR Code</label>
-        <input type="text" name="qr_code" placeholder="RAIL-1" required>
+    <label>QR Code</label><br>
+    <input type="text" name="qr_code" placeholder="RAIL-1" required><br><br>
 
-        <label>Name</label>
-        <input type="text" name="name" required>
+    <label>Name</label><br>
+    <input type="text" name="name" required><br><br>
 
-        <label>Father Name</label>
-        <input type="text" name="father" required>
+    <label>Father Name</label><br>
+    <input type="text" name="father" required><br><br>
 
-        <label>Mother Name</label>
-        <input type="text" name="mother" required>
+    <label>Mother Name</label><br>
+    <input type="text" name="mother" required><br><br>
 
-        <label>Phone</label>
-        <input type="text" name="phone" required>
+    <label>Phone</label><br>
+    <input type="text" name="phone" required><br><br>
 
-        <label>Address</label>
-        <textarea name="address" rows="4" required></textarea>
+    <label>Address</label><br>
+    <textarea name="address" required></textarea><br><br>
 
-        <button type="submit">Save Details</button>
-    </form>
-</div>
-
+    <button type="submit">Save</button>
+</form>
 </body>
 </html>
