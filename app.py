@@ -1,248 +1,101 @@
-from flask import Flask, render_template, request, redirect, send_file
-import mysql.connector
-import os, time
-from urllib.parse import urlparse
-from datetime import datetime
-import qrcode
-from io import BytesIO
-from reportlab.lib.pagesizes import A4
-from reportlab.pdfgen import canvas
-from reportlab.lib.units import inch
-from reportlab.lib.utils import ImageReader
+import os
+from flask import Flask, render_template_string
 
 app = Flask(__name__)
 
-# --------------------------------------------------
-# DATABASE CONNECTION (Railway)
-# --------------------------------------------------
-def get_db():
-    db_url = os.environ.get("MYSQL_PUBLIC_URL")
-    if not db_url:
-        raise Exception("MYSQL_PUBLIC_URL not set")
-
-    url = urlparse(db_url)
-
-    for _ in range(5):
-        try:
-            return mysql.connector.connect(
-                host=url.hostname,
-                port=url.port,
-                user=url.username,
-                password=url.password,
-                database=url.path.lstrip("/")
-            )
-        except mysql.connector.Error as e:
-            print("DB retry:", e)
-            time.sleep(2)
-
-    raise Exception("Database connection failed")
-
-# --------------------------------------------------
-# HOME
-# --------------------------------------------------
 @app.route("/")
-def home():
-    return render_template("home.html")
+def payment_success():
+    return render_template_string("""
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Payment Successful</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            background: linear-gradient(135deg, #43cea2, #185a9d);
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
-# --------------------------------------------------
-# ADMIN UI (VIEW ALL QR)
-# --------------------------------------------------
-@app.route("/admin-ui")
-def admin_ui():
-    db = get_db()
-    cur = db.cursor(dictionary=True)
+        .card {
+            background: white;
+            width: 380px;
+            padding: 40px;
+            border-radius: 18px;
+            text-align: center;
+            box-shadow: 0 20px 45px rgba(0,0,0,0.25);
+        }
 
-    cur.execute("SELECT id, qr_code, status FROM qr_data ORDER BY id DESC")
-    qr_list = cur.fetchall()
+        .check {
+            width: 80px;
+            height: 80px;
+            margin: auto;
+            background: #4CAF50;
+            border-radius: 50%;
+            color: white;
+            font-size: 42px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
 
-    cur.close()
-    db.close()
+        h1 {
+            color: #333;
+            margin-bottom: 8px;
+        }
 
-    return render_template("admin.html", qr_list=qr_list)
+        p {
+            color: #666;
+            margin-bottom: 25px;
+        }
 
-# --------------------------------------------------
-# GENERATE QR (POST)
-# --------------------------------------------------
-@app.route("/admin", methods=["POST"])
-def admin_generate():
-    count = int(request.form.get("count", 1))
-    now = datetime.now()
+        .info {
+            background: #f2f2f2;
+            padding: 14px;
+            border-radius: 8px;
+            font-size: 14px;
+            margin-bottom: 25px;
+        }
 
-    db = get_db()
-    cur = db.cursor()
+        .btn {
+            padding: 12px 28px;
+            background: #185a9d;
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            transition: 0.3s;
+        }
 
-    cur.execute("SELECT IFNULL(MAX(id),0) FROM qr_data")
-    last_id = cur.fetchone()[0]
+        .btn:hover {
+            background: #144a82;
+        }
+    </style>
+</head>
+<body>
 
-    for i in range(1, count + 1):
-        cur.execute(
-            "INSERT INTO qr_data (qr_code, status, created_at) VALUES (%s,'UNUSED',%s)",
-            (f"RAIL-{last_id + i}", now)
-        )
+<div class="card">
+    <div class="check">✓</div>
+    <h1>Payment Successful</h1>
+    <p>Your payment has been processed successfully.</p>
 
-    db.commit()
-    cur.close()
-    db.close()
+    <div class="info">
+        <strong>Amount:</strong> $99.00<br>
+        <strong>Status:</strong> Completed
+    </div>
 
-    return redirect("/admin-ui")
+    <a class="btn" href="#">Continue</a>
+</div>
 
-# --------------------------------------------------
-# ADD PASSENGER (EMPTY FORM)
-# --------------------------------------------------
-@app.route("/add-ui", methods=["GET", "POST"])
-def add_ui():
-    if request.method == "POST":
-        return save_passenger(request.form)
+</body>
+</html>
+""")
 
-    return render_template("add.html")
-
-# --------------------------------------------------
-# ADD PASSENGER WITH QR (FROM SCAN)
-# --------------------------------------------------
-@app.route("/add-ui/<qr_code>")
-def add_with_qr(qr_code):
-    return render_template("add.html", qr_code=qr_code.upper())
-
-# --------------------------------------------------
-# SAVE PASSENGER (SHARED LOGIC)
-# --------------------------------------------------
-def save_passenger(form):
-    qr_code = form.get("qr_code", "").strip().upper()
-
-    if not qr_code:
-        return "QR CODE REQUIRED"
-
-    db = get_db()
-    cur = db.cursor(dictionary=True)
-
-    cur.execute("SELECT * FROM qr_data WHERE qr_code=%s", (qr_code,))
-    qr = cur.fetchone()
-
-    if not qr:
-        return "INVALID QR CODE"
-
-    if qr["status"] == "USED":
-        return redirect(f"/view/{qr_code}")
-
-    cur.execute("""
-        UPDATE qr_data
-        SET name=%s,
-            father=%s,
-            mother=%s,
-            phone=%s,
-            address=%s,
-            filled_at=%s,
-            status='USED'
-        WHERE qr_code=%s
-    """, (
-        form["name"],
-        form["father"],
-        form["mother"],
-        form["phone"],
-        form["address"],
-        datetime.now(),
-        qr_code
-    ))
-
-    db.commit()
-    cur.close()
-    db.close()
-
-    return redirect(f"/view/{qr_code}")
-
-# --------------------------------------------------
-# VIEW PASSENGER
-# --------------------------------------------------
-@app.route("/view/<qr_code>")
-def view_passenger(qr_code):
-    db = get_db()
-    cur = db.cursor(dictionary=True)
-
-    cur.execute("SELECT * FROM qr_data WHERE qr_code=%s", (qr_code,))
-    passenger = cur.fetchone()
-
-    cur.close()
-    db.close()
-
-    if not passenger:
-        return "No data found"
-
-    return render_template("view.html", passenger=passenger)
-
-# --------------------------------------------------
-# DOWNLOAD ALL QR AS PDF
-# --------------------------------------------------
-@app.route("/admin/download-qr-pdf")
-def download_qr_pdf():
-    db = get_db()
-    cur = db.cursor(dictionary=True)
-
-    cur.execute("SELECT qr_code FROM qr_data ORDER BY id ASC")
-    qr_list = cur.fetchall()
-
-    cur.close()
-    db.close()
-
-    if not qr_list:
-        return "No QR codes found"
-
-    buffer = BytesIO()
-    pdf = canvas.Canvas(buffer, pagesize=A4)
-    width, height = A4
-
-    x = 1 * inch
-    y = height - 1 * inch
-    size = 2 * inch
-    gap = 0.5 * inch
-
-    for qr in qr_list:
-        code = qr["qr_code"]
-        url = f"{request.host_url.rstrip('/')}/view/{code}"
-
-        img = qrcode.make(url)
-        img_io = BytesIO()
-        img.save(img_io, format="PNG")
-        img_io.seek(0)
-
-        pdf.drawImage(ImageReader(img_io), x, y - size, size, size)
-        pdf.drawString(x, y - size - 15, code)
-
-        x += size + gap
-        if x + size > width:
-            x = 1 * inch
-            y -= size + inch
-        if y < 2 * inch:
-            pdf.showPage()
-            x = 1 * inch
-            y = height - 1 * inch
-
-    pdf.save()
-    buffer.seek(0)
-
-    return send_file(
-        buffer,
-        as_attachment=True,
-        download_name="all_qr_codes.pdf",
-        mimetype="application/pdf"
-    )
-
-# --------------------------------------------------
-# QR IMAGE
-# --------------------------------------------------
-@app.route("/qr-image/<qr_code>")
-def qr_image(qr_code):
-    url = f"{request.host_url.rstrip('/')}/view/{qr_code}"
-    img = qrcode.make(url)
-
-    buf = BytesIO()
-    img.save(buf, format="PNG")
-    buf.seek(0)
-
-    return send_file(buf, mimetype="image/png")
-
-# --------------------------------------------------
-# START (LOCAL ONLY)
-# --------------------------------------------------
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
